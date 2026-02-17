@@ -7,6 +7,7 @@ pub mod windows;
 #[cfg(target_os = "macos")]
 pub mod macos;
 
+// Main function to start tracking input events based on the operating system
 pub fn run() {
     #[cfg(target_os = "linux")]
     {

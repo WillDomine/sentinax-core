@@ -13,6 +13,7 @@ pub fn start_tracking() -> io::Result<()> {
     //Open inputs path for scanning
     let paths = fs::read_dir("/dev/input")?;
 
+    //Scan for devices and spawn a thread for each one
     for path in paths {
         let path = path?.path();
 
@@ -26,6 +27,7 @@ pub fn start_tracking() -> io::Result<()> {
         }
     }
 
+    // If no devices were found, print a message and exit
     if threads.is_empty() {
         println!("No Devices Found");
         return Ok(());
@@ -33,6 +35,7 @@ pub fn start_tracking() -> io::Result<()> {
 
     println!("Running Sentinax Core");
 
+    // Keeps the main thread alive while device threads are running
     for t in threads {
         let _ = t.join();
     }
@@ -40,8 +43,10 @@ pub fn start_tracking() -> io::Result<()> {
     return Ok(());
 }
 
+// Function to monitor a single device for events
 fn monitor_device(mut device: Device, name: String) {
     loop {
+        // Wait for events from the device
         match device.fetch_events() {
             Ok(iterator) => {
                 for event in iterator {
@@ -84,6 +89,7 @@ fn monitor_device(mut device: Device, name: String) {
                     }
                 }
             }
+            // If there's an error (e.g., device disconnected), print a message and exit the thread
             Err(e) => {
                 println!("Device {} Disconnected: {:?}", name, e);
             }

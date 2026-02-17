@@ -1,6 +1,6 @@
 use chrono::Local;
-use evdev::Device;
 use evdev::EventType;
+use evdev::{AbsoluteAxisCode, Device, KeyCode, RelativeAxisCode};
 use std::fs;
 use std::io;
 use std::thread;
@@ -19,11 +19,23 @@ pub fn start_tracking() -> io::Result<()> {
 
         if let Ok(device) = Device::open(&path) {
             let name = device.name().unwrap_or("Unknown").to_string();
-
-            println!("Attached: {} ({:?})", name, path);
-            threads.push(thread::spawn(move || {
-                monitor_device(device, name);
-            }));
+            let has_keys = device
+                .supported_keys()
+                .map_or(false, |keys| keys.contains(evdev::Key::KEY_ENTER));
+            let has_rel = device.supported_relative_axes().map_or(false, |axes| {
+                axes.contains(evdev::RelativeAxisCode::REL_X)
+                    || axes.contains(evdev::RelativeAxisCode::REL_Y)
+            });
+            let has_abs = device.supported_absolute_axes().map_or(false, |axes| {
+                axes.contains(evdev::AbsoluteAxisCode::ABS_X)
+                    || axes.contains(evdev::AbsoluteAxisCode::ABS_Y)
+            });
+            if has_keys || has_rel || has_abs {
+                println!("Attached: {} ({:?})", name, path);
+                threads.push(thread::spawn(move || {
+                    monitor_device(device, name);
+                }));
+            }
         }
     }
 

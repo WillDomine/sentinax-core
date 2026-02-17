@@ -49,6 +49,7 @@ fn monitor_device(mut device: Device, name: String) {
                     let timestamp = now.format("%H:%M:%S%.3f");
 
                     match event.event_type() {
+                        // Handle Keyboard and Mouse Button Events
                         EventType::KEY => {
                             println!(
                                 "{} | {} | KEY | Code: {} | State {}",
@@ -58,6 +59,7 @@ fn monitor_device(mut device: Device, name: String) {
                                 event.value()
                             );
                         }
+                        // Handle Mouse Movement Events
                         EventType::RELATIVE => {
                             let axis = if event.code() == 0 { "X" } else { "Y" };
                             println!(
@@ -68,6 +70,7 @@ fn monitor_device(mut device: Device, name: String) {
                                 event.value()
                             );
                         }
+                        // Handle Absolute Position Events (e.g., Touchscreens, Controllers)
                         EventType::ABSOLUTE => {
                             println!(
                                 "{} | {} | ABS   | Code: {} | Val: {}",
